@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strathmore Wellness App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            perspective: 1000px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            transform-style: preserve-3d;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            transform: translateZ(50px);
+            animation: floatHeader 3s ease-in-out infinite;
+        }
+
+        @keyframes floatHeader {
+            0%, 100% { transform: translateZ(50px) translateY(0px); }
+            50% { transform: translateZ(50px) translateY(-10px); }
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .wellness-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+            transform-style: preserve-3d;
+        }
+
+        .wellness-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateZ(0) rotateX(0deg) rotateY(0deg);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wellness-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .wellness-card:hover {
+            transform: translateZ(30px) rotateX(5deg) rotateY(5deg) scale(1.02);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.2),
+                0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        .wellness-card:hover::before {
+            opacity: 1;
+        }
+
+        .wellness-card:nth-child(1):hover {
+            transform: translateZ(30px) rotateX(-5deg) rotateY(5deg) scale(1.02);
+        }
+
+        .wellness-card:nth-child(2):hover {
+            transform: translateZ(30px) rotateX(0deg) rotateY(0deg) scale(1.02);
+        }
+
+        .wellness-card:nth-child(3):hover {
+            transform: translateZ(30px) rotateX(5deg) rotateY(-5deg) scale(1.02);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-right: 15px;
+            transform: translateZ(10px);
+            transition: transform 0.3s ease;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .wellness-card:hover .card-icon {
+            transform: translateZ(20px) scale(1.1);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+            transform: translateX(0);
+            transition: transform 0.2s ease;
+        }
+
+        .wellness-card:hover .feature-list li {
+            transform: translateX(5px);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            transform: translateZ(5px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateZ(10px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .dashboard {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.1),
+                0 0 0 1px rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+            transform: translateZ(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard:hover {
+            transform: translateZ(30px) scale(1.01);
+        }
+
+        .dashboard-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            transform: translateZ(10px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            transform-style: preserve-3d;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transform: translateZ(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateZ(15px) rotateX(5deg);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+            transform: translateZ(5px);
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            perspective: 1000px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateZ(0) scale(0.8);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.3),
+                0 0 0 1px rgba(255,255,255,0.1);
+        }
+
+        .modal:not(.hidden) .modal-content {
+            transform: translateZ(50px) scale(1);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: all 0.2s ease;
+            transform: translateZ(5px);
+        }
+
+        .close-btn:hover {
+            color: #667eea;
+            transform: translateZ(10px) scale(1.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            transform: translateZ(0);
+            transition: transform 0.2s ease;
+        }
+
+        .form-group:hover {
+            transform: translateZ(5px);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            transform: translateZ(5px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .progress-bar {
+            background: #eee;
+            border-radius: 10px;
+            height: 10px;
+            margin: 10px 0;
+            transform: translateZ(0);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transform: translateZ(2px);
+        }
+
+        /* 3D Animation for page load */
+        @keyframes pageLoad {
+            0% {
+                opacity: 0;
+                transform: translateZ(-100px) rotateX(90deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateZ(0) rotateX(0deg);
+            }
+        }
+
+        .container {
+            animation: pageLoad 1s ease-out;
+        }
+
+        /* Floating animation for cards */
+        @keyframes float {
+            0%, 100% { transform: translateZ(0) translateY(0px); }
+            50% { transform: translateZ(5px) translateY(-5px); }
+        }
+
+        .wellness-card:nth-child(1) {
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+
+        .wellness-card:nth-child(2) {
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+
+        .wellness-card:nth-child(3) {
+            animation: float 4s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🌟 Strathmore Wellness</div>
+            <div class="tagline">Your Complete Wellness Journey</div>
+        </header>
+
+        <!-- Dashboard Overview -->
+        <div class="dashboard">
+            <h2 class="dashboard-title">Wellness Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="financial-score">85</div>
+                    <div class="stat-label">Financial Health</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="intellectual-score">72</div>
+                    <div class="stat-label">Intellectual Growth</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="mental-score">78</div>
+                    <div class="stat-label">Mental Wellness</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="overall-score">78</div>
+                    <div class="stat-label">Overall Wellness</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wellness Categories -->
+        <div class="wellness-grid">
+            <!-- Financial Wellness -->
+            <div class="wellness-card">
+                <div class="card-header">
+                    <div class="card-icon">💰</div>
+                    <div class="card-title">Financial Wellness</div>
+                </div>
+                <div class="card-description">
+                    Take control of your financial future with budgeting tools, expense tracking, and savings goals.
+                </div>
+                <ul class="feature-list">
+                    <li>📊 Budget Management</li>
+                    <li>💳 Expense Tracking</li>
+                    <li>🎯 Savings Goals</li>
+                    <li>📈 Financial Reports</li>
+                    <li>💡 Financial Tips</li>
+                </ul>
+                <button class="btn" onclick="openFinancialModule()">Manage Finances</button>
+            </div>
+
+            <!-- Intellectual Wellness -->
+            <div class="wellness-card">
+                <div class="card-header">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title">Intellectual Wellness</div>
+                </div>
+                <div class="card-description">
+                    Expand your knowledge and skills through learning resources, courses, and cognitive challenges.
+                </div>
+                <ul class="feature-list">
+                    <li>📚 Learning Resources</li>
+                    <li>🎓 Course Recommendations</li>
+                    <li>🧩 Brain Training Games</li>
+                    <li>📖 Reading Tracker</li>
+                    <li>🏆 Achievement System</li>
+                </ul>
+                <button class="btn" onclick="openIntellectualModule()">Start Learning</button>
+            </div>
+
+            <!-- Mental Wellness -->
+            <div class="wellness-card">
+                <div class="card-header">
+                    <div class="card-icon">🧘</div>
+                    <div class="card-title">Mental Wellness</div>
+                </div>
+                <div class="card-description">
+                    Nurture your mental health with mindfulness practices, mood tracking, and stress management tools.
+                </div>
+                <ul class="feature-list">
+                    <li>🧘‍♀️ Meditation Sessions</li>
+                    <li>📝 Mood Tracking</li>
+                    <li>😌 Stress Management</li>
+                    <li>💤 Sleep Monitoring</li>
+                    <li>🤝 Support Resources</li>
+                </ul>
+                <button class="btn" onclick="openMentalModule()">Improve Wellbeing</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Module Modal -->
+    <div id="financial-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('financial-modal')">&times;</span>
+            <h2>Financial Wellness</h2>
+            <div class="form-group">
+                <label>Monthly Budget (KES)</label>
+                <input type="number" id="monthly-budget" placeholder="Enter your monthly budget">
+            </div>
+            <div class="form-group">
+                <label>Add Expense</label>
+                <input type="text" id="expense-title" placeholder="Expense description">
+                <input type="number" id="expense-amount" placeholder="Amount (KES)">
+                <select id="expense-category">
+                    <option value="">Select Category</option>
+                    <option value="food">Food & Dining</option>
+                    <option value="transport">Transportation</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="healthcare">Healthcare</option>
+                </select>
+            </div>
+            <button class="btn" onclick="addExpense()">Add Expense</button>
+            <div id="expense-list"></div>
+        </div>
+    </div>
+
+    <!-- Intellectual Module Modal -->
+    <div id="intellectual-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('intellectual-modal')">&times;</span>
+            <h2>Intellectual Wellness</h2>
+            <div class="form-group">
+                <label>Learning Goal</label>
+                <input type="text" id="learning-goal" placeholder="What do you want to learn?">
+            </div>
+            <div class="form-group">
+                <label>Daily Reading Time (minutes)</label>
+                <input type="number" id="reading-time" placeholder="Target reading time">
+            </div>
+            <div class="form-group">
+                <label>Current Book/Course</label>
+                <input type="text" id="current-book" placeholder="What are you currently studying?">
+            </div>
+            <div class="progress-bar">
+                <div class="progress" style="width: 45%"></div>
+            </div>
+            <p>Progress: 45% complete</p>
+            <button class="btn" onclick="updateLearningProgress()">Update Progress</button>
+        </div>
+    </div>
+
+    <!-- Mental Module Modal -->
+    <div id="mental-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('mental-modal')">&times;</span>
+            <h2>Mental Wellness</h2>
+            <div class="form-group">
+                <label>How are you feeling today?</label>
+                <select id="mood-rating">
+                    <option value="">Select your mood</option>
+                    <option value="5">😊 Excellent</option>
+                    <option value="4">🙂 Good</option>
+                    <option value="3">😐 Neutral</option>
+                    <option value="2">😔 Low</option>
+                    <option value="1">😢 Very Low</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Meditation Minutes Today</label>
+                <input type="number" id="meditation-time" placeholder="Minutes meditated">
+            </div>
+            <div class="form-group">
+                <label>Sleep Hours Last Night</label>
+                <input type="number" id="sleep-hours" placeholder="Hours of sleep">
+            </div>
+            <div class="form-group">
+                <label>Notes/Reflections</label>
+                <textarea id="daily-notes" rows="4" placeholder="How was your day? Any thoughts or reflections?"></textarea>
+            </div>
+            <button class="btn" onclick="saveMentalWellness()">Save Entry</button>
+        </div>
+    </div>
+
+    <script>
+        // Modal Functions
+        function openFinancialModule() {
+            document.getElementById('financial-modal').classList.remove('hidden');
+        }
+
+        function openIntellectualModule() {
+            document.getElementById('intellectual-modal').classList.remove('hidden');
+        }
+
+        function openMentalModule() {
+            document.getElementById('mental-modal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Financial Functions
+        function addExpense() {
+            const title = document.getElementById('expense-title').value;
+            const amount = document.getElementById('expense-amount').value;
+            const category = document.getElementById('expense-category').value;
+            
+            if (title && amount && category) {
+                const expenseList = document.getElementById('expense-list');
+                const expenseItem = document.createElement('div');
+                expenseItem.style.padding = '10px';
+                expenseItem.style.borderBottom = '1px solid #eee';
+                expenseItem.innerHTML = `
+                    <p><strong>${title}</strong> - KES ${amount} (${category})</p>
+                `;
+                expenseList.appendChild(expenseItem);
+                
+                // Clear form
+                document.getElementById('expense-title').value = '';
+                document.getElementById('expense-amount').value = '';
+                document.getElementById('expense-category').value = '';
+                
+                alert('Expense added successfully!');
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        // Intellectual Functions
+        function updateLearningProgress() {
+            const goal = document.getElementById('learning-goal').value;
+            const readingTime = document.getElementById('reading-time').value;
+            const currentBook = document.getElementById('current-book').value;
+            
+            if (goal || readingTime || currentBook) {
+                alert('Learning progress updated! Keep up the great work!');
+                // Update progress bar
+                const progressBar = document.querySelector('#intellectual-modal .progress');
+                const currentWidth = parseInt(progressBar.style.width) || 45;
+                const newWidth = Math.min(currentWidth + 10, 100);
+                progressBar.style.width = newWidth + '%';
+                document.querySelector('#intellectual-modal p').textContent = `Progress: ${newWidth}% complete`;
+            } else {
+                alert('Please fill in at least one field');
+            }
+        }
+
+        // Mental Wellness Functions
+        function saveMentalWellness() {
+            const mood = document.getElementById('mood-rating').value;
+            const meditation = document.getElementById('meditation-time').value;
+            const sleep = document.getElementById('sleep-hours').value;
+            const notes = document.getElementById('daily-notes').value;
+            
+            if (mood || meditation || sleep || notes) {
+                alert('Mental wellness entry saved! Remember to take care of yourself.');
+                closeModal('mental-modal');
+                
+                // Clear form
+                document.getElementById('mood-rating').value = '';
+                document.getElementById('meditation-time').value = '';
+                document.getElementById('sleep-hours').value = '';
+                document.getElementById('daily-notes').value = '';
+            } else {
+                alert('Please fill in at least one field');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Update dashboard scores periodically
+        function updateDashboard() {
+            const scores = {
+                financial: Math.floor(Math.random() * 20) + 75,
+                intellectual: Math.floor(Math.random() * 20) + 65,
+                mental: Math.floor(Math.random() * 20) + 70
+            };
+            
+            document.getElementById('financial-score').textContent = scores.financial;
+            document.getElementById('intellectual-score').textContent = scores.intellectual;
+            document.getElementById('mental-score').textContent = scores.mental;
+            
+            const overall = Math.round((scores.financial + scores.intellectual + scores.mental) / 3);
+            document.getElementById('overall-score').textContent = overall;
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboard();
+            setInterval(updateDashboard, 30000);
+        });
+    </script>
+</body>
+</html>
