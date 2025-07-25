@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wellness Tracker</title>
+  <link rel="stylesheet" href="Css%20body.css">
+  <style>
+    body {
+      perspective: 1000px;
+    }
+    .card {
+      transform: rotateY(2deg) rotateX(2deg) translateY(-50px);
+      opacity: 0;
+      animation: slideDownFade 0.8s ease forwards;
+    }
+    .card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .card:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    .card:hover {
+      transform: rotateY(0deg) rotateX(0deg) scale(1.02);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+    button {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    @keyframes slideDownFade {
+      to {
+        transform: rotateY(2deg) rotateX(2deg) translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Wellness & Expense Tracker</h1>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Add Expense</h2>
+      <input type="text" id="expense-title" placeholder="Title">
+      <input type="number" id="expense-amount" placeholder="Amount">
+      <input type="text" id="expense-category" placeholder="Category">
+      <button onclick="submitExpense()">Submit Expense</button>
+    </section>
+
+    <section class="card">
+      <h2>Add Wellness Entry</h2>
+      <input type="number" id="mood-rating" placeholder="Mood Rating (1-10)">
+      <input type="number" id="meditation-minutes" placeholder="Meditation Minutes">
+      <input type="number" id="sleep-hours" placeholder="Sleep Hours">
+      <input type="text" id="notes" placeholder="Notes">
+      <button onclick="submitWellness()">Submit Entry</button>
+    </section>
+
+    <section class="card">
+      <h2>Expense History</h2>
+      <ul id="expense-list"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Wellness App</p>
+  </footer>
+
+  <script>
+    async function submitExpense() {
+      const title = document.getElementById('expense-title').value;
+      const amount = parseFloat(document.getElementById('expense-amount').value);
+      const category = document.getElementById('expense-category').value;
+      if (!title || !amount || !category) return alert('Please fill out all fields.');
+      await fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, amount, category })
+      });
+      loadExpenses();
+    }
+
+    async function submitWellness() {
+      const mood_rating = parseInt(document.getElementById('mood-rating').value);
+      const meditation_minutes = parseInt(document.getElementById('meditation-minutes').value);
+      const sleep_hours = parseFloat(document.getElementById('sleep-hours').value);
+      const notes = document.getElementById('notes').value;
+      await fetch('/api/mental-wellness-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mood_rating, meditation_minutes, sleep_hours, notes })
+      });
+      alert('Wellness entry submitted!');
+    }
+
+    async function loadExpenses() {
+      const res = await fetch('/api/expenses');
+      const data = await res.json();
+      const list = document.getElementById('expense-list');
+      list.innerHTML = '';
+      data.forEach(e => {
+        const item = document.createElement('li');
+        item.textContent = `${e.title}: $${e.amount} (${e.category})`;
+        list.appendChild(item);
+      });
+    }
+
+    window.onload = loadExpenses;
+  </script>
+</body>
+</html>
