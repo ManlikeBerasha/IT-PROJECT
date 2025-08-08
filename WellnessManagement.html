@@ -488,6 +488,7 @@
             <div class="form-group">
                 <label>Monthly Budget (KES)</label>
                 <input type="number" id="monthly-budget" placeholder="Enter your monthly budget">
+                <button class="btn" onclick="saveBudget()" style="margin-top: 10px;">Save Budget</button>
             </div>
             <div class="form-group">
                 <label>Add Expense</label>
@@ -524,11 +525,15 @@
                 <label>Current Book/Course</label>
                 <input type="text" id="current-book" placeholder="What are you currently studying?">
             </div>
-            <div class="progress-bar">
-                <div class="progress" style="width: 45%"></div>
+            <div class="form-group">
+                <label>Progress Percentage (0-100)</label>
+                <input type="number" id="progress-input" min="0" max="1d00" placeholder="Current progress %">
             </div>
-            <p>Progress: 45% complete</p>
-            <button class="btn" onclick="updateLearningProgress()">Update Progress</button>
+            <div class="progress-bar">
+                <div class="progress" style="width: 0%"></div>
+            </div>
+            <p>Progress: <span id="progress-text">0% complete</span></p>
+            <button class="btn" onclick="updateLearningProgress()">Save Progress</button>
         </div>
     </div>
 
@@ -568,10 +573,13 @@
         // Modal Functions
         function openFinancialModule() {
             document.getElementById('financial-modal').classList.remove('hidden');
+            loadExpenses();
+            loadBudget();
         }
 
         function openIntellectualModule() {
             document.getElementById('intellectual-modal').classList.remove('hidden');
+            loadIntellectualEntries();
         }
 
         function openMentalModule() {
@@ -583,67 +591,184 @@
         }
 
         // Financial Functions
-        function addExpense() {
+        async function addExpense() {
             const title = document.getElementById('expense-title').value;
             const amount = document.getElementById('expense-amount').value;
             const category = document.getElementById('expense-category').value;
             
             if (title && amount && category) {
-                const expenseList = document.getElementById('expense-list');
-                const expenseItem = document.createElement('div');
-                expenseItem.style.padding = '10px';
-                expenseItem.style.borderBottom = '1px solid #eee';
-                expenseItem.innerHTML = `
-                    <p><strong>${title}</strong> - KES ${amount} (${category})</p>
-                `;
-                expenseList.appendChild(expenseItem);
-                
-                // Clear form
-                document.getElementById('expense-title').value = '';
-                document.getElementById('expense-amount').value = '';
-                document.getElementById('expense-category').value = '';
-                
-                alert('Expense added successfully!');
+                try {
+                    const response = await fetch('/api/expenses', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, amount: parseFloat(amount), category })
+                    });
+                    
+                    if (response.ok) {
+                        // Clear form
+                        document.getElementById('expense-title').value = '';
+                        document.getElementById('expense-amount').value = '';
+                        document.getElementById('expense-category').value = '';
+                        
+                        alert('Expense added successfully!');
+                        loadExpenses();
+                        updateDashboard();
+                    } else {
+                        alert('Error adding expense');
+                    }
+                } catch (error) {
+                    alert('Error connecting to server');
+                }
             } else {
                 alert('Please fill in all fields');
             }
         }
 
+        async function loadExpenses() {
+            try {
+                const response = await fetch('/api/expenses');
+                const expenses = await response.json();
+                const expenseList = document.getElementById('expense-list');
+                expenseList.innerHTML = '';
+                
+                expenses.slice(0, 5).forEach(expense => {
+                    const expenseItem = document.createElement('div');
+                    expenseItem.style.padding = '10px';
+                    expenseItem.style.borderBottom = '1px solid #eee';
+                    expenseItem.innerHTML = `
+                        <p><strong>${expense.title}</strong> - KES ${expense.amount} (${expense.category})</p>
+                        <small>${new Date(expense.date_created).toLocaleDateString()}</small>
+                    `;
+                    expenseList.appendChild(expenseItem);
+                });
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+            }
+        }
+
+        async function saveBudget() {
+            const budget = document.getElementById('monthly-budget').value;
+            if (budget) {
+                try {
+                    const response = await fetch('/api/budget', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ monthly_budget: parseFloat(budget) })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Budget saved successfully!');
+                        updateDashboard();
+                    }
+                } catch (error) {
+                    alert('Error saving budget');
+                }
+            }
+        }
+
+        async function loadBudget() {
+            try {
+                const response = await fetch('/api/budget/latest');
+                const budget = await response.json();
+                if (budget.monthly_budget) {
+                    document.getElementById('monthly-budget').value = budget.monthly_budget;
+                }
+            } catch (error) {
+                console.error('Error loading budget:', error);
+            }
+        }
+
         // Intellectual Functions
-        function updateLearningProgress() {
+        async function updateLearningProgress() {
             const goal = document.getElementById('learning-goal').value;
             const readingTime = document.getElementById('reading-time').value;
             const currentBook = document.getElementById('current-book').value;
+            const progress = Math.min(100, Math.max(0, parseInt(document.getElementById('progress-input').value) || 0));
             
             if (goal || readingTime || currentBook) {
-                alert('Learning progress updated! Keep up the great work!');
-                // Update progress bar
-                const progressBar = document.querySelector('#intellectual-modal .progress');
-                const currentWidth = parseInt(progressBar.style.width) || 45;
-                const newWidth = Math.min(currentWidth + 10, 100);
-                progressBar.style.width = newWidth + '%';
-                document.querySelector('#intellectual-modal p').textContent = `Progress: ${newWidth}% complete`;
+                try {
+                    const response = await fetch('/api/intellectual-wellness-entries', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            learning_goal: goal, 
+                            reading_time: parseInt(readingTime) || 0, 
+                            current_book: currentBook,
+                            progress_percentage: progress
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Learning progress updated! Keep up the great work!');
+                        // Update progress bar
+                        const progressBar = document.querySelector('#intellectual-modal .progress');
+                        progressBar.style.width = progress + '%';
+                        
+                        // Clear form
+                        document.getElementById('learning-goal').value = '';
+                        document.getElementById('reading-time').value = '';
+                        document.getElementById('current-book').value = '';
+                        document.getElementById('progress-input').value = '';
+                        
+                        updateDashboard();
+                    }
+                } catch (error) {
+                    alert('Error saving learning progress');
+                }
             } else {
                 alert('Please fill in at least one field');
             }
         }
 
+        async function loadIntellectualEntries() {
+            try {
+                const response = await fetch('/api/intellectual-wellness-entries');
+                const entries = await response.json();
+                if (entries.length > 0) {
+                    const latest = entries[0];
+                    const progressBar = document.querySelector('#intellectual-modal .progress');
+                    progressBar.style.width = (latest.progress_percentage || 0) + '%';
+                }
+            } catch (error) {
+                console.error('Error loading intellectual entries:', error);
+            }
+        }
+
         // Mental Wellness Functions
-        function saveMentalWellness() {
+        async function saveMentalWellness() {
             const mood = document.getElementById('mood-rating').value;
             const meditation = document.getElementById('meditation-time').value;
             const sleep = document.getElementById('sleep-hours').value;
             const notes = document.getElementById('daily-notes').value;
             
             if (mood || meditation || sleep || notes) {
-                alert('Mental wellness entry saved! Remember to take care of yourself.');
-                closeModal('mental-modal');
-                
-                // Clear form
-                document.getElementById('mood-rating').value = '';
-                document.getElementById('meditation-time').value = '';
-                document.getElementById('sleep-hours').value = '';
-                document.getElementById('daily-notes').value = '';
+                try {
+                    const response = await fetch('/api/mental-wellness-entries', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            mood_rating: parseInt(mood) || null, 
+                            meditation_minutes: parseInt(meditation) || null, 
+                            sleep_hours: parseFloat(sleep) || null, 
+                            notes: notes || null
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Mental wellness entry saved! Remember to take care of yourself.');
+                        closeModal('mental-modal');
+                        
+                        // Clear form
+                        document.getElementById('mood-rating').value = '';
+                        document.getElementById('meditation-time').value = '';
+                        document.getElementById('sleep-hours').value = '';
+                        document.getElementById('daily-notes').value = '';
+                        
+                        updateDashboard();
+                    }
+                } catch (error) {
+                    alert('Error saving mental wellness entry');
+                }
             } else {
                 alert('Please fill in at least one field');
             }
@@ -659,26 +784,25 @@
             });
         }
 
-        // Update dashboard scores periodically
-        function updateDashboard() {
-            const scores = {
-                financial: Math.floor(Math.random() * 20) + 75,
-                intellectual: Math.floor(Math.random() * 20) + 65,
-                mental: Math.floor(Math.random() * 20) + 70
-            };
-            
-            document.getElementById('financial-score').textContent = scores.financial;
-            document.getElementById('intellectual-score').textContent = scores.intellectual;
-            document.getElementById('mental-score').textContent = scores.mental;
-            
-            const overall = Math.round((scores.financial + scores.intellectual + scores.mental) / 3);
-            document.getElementById('overall-score').textContent = overall;
+        // Update dashboard scores from server
+        async function updateDashboard() {
+            try {
+                const response = await fetch('/api/dashboard-stats');
+                const scores = await response.json();
+                
+                document.getElementById('financial-score').textContent = scores.financial;
+                document.getElementById('intellectual-score').textContent = scores.intellectual;
+                document.getElementById('mental-score').textContent = scores.mental;
+                document.getElementById('overall-score').textContent = scores.overall;
+            } catch (error) {
+                console.error('Error updating dashboard:', error);
+            }
         }
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             updateDashboard();
-            setInterval(updateDashboard, 30000);
+            setInterval(updateDashboard, 30000); // Update every 30 seconds
         });
     </script>
 </body>
